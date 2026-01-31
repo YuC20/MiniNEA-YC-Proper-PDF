@@ -7,9 +7,17 @@ display = board.display
 WIDTH, HEIGHT = display.get_bounds()
 
 # player data
-player = {
-    "x": 57,
-    "y": 15,
+grid = [[1, 2, 3, 4, 5, 6], 
+        [1 ,2 ,3 ,4 ,5 ,6]]
+
+playerx = [14, 24, 34, 54, 68, 86, 96, 106]
+playery = 23
+
+xcoord = 1
+
+player_values = {
+    "x": 34,
+    "y": playery,
     "width": 8,
     "height": 8
 }
@@ -30,15 +38,17 @@ stage_values2 = {
 
 
 playersprite = [
-    0b01111100,
-    0b01010101,
-    0b01111101,
-    0b10011110,
-    0b01111100,
-    0b00011110,
-    0b00110010,
-    0b01000001
-]
+[0, 1, 1, 1, 1, 1, 0, 0], 
+[0, 1, 0, 1, 0, 1, 0, 1], 
+[0, 1, 1, 1, 1, 1, 0, 1], 
+[1, 0, 0, 1, 1, 1, 1, 0], 
+[0, 1, 1, 1, 1, 1, 0, 0], 
+[0, 0, 0, 1, 1, 1, 1, 0], 
+[0, 0, 1, 1, 0, 0, 1, 0], 
+[0, 1, 0, 0, 0, 0, 0, 1]]
+
+
+
 
 stage = [
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0],
@@ -105,6 +115,7 @@ stage = [
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]							
+
 
 stage2 = [
 [0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -174,10 +185,10 @@ stage2 = [
 
 def DrawPlayer():
     display.set_pen(15)
-    for row in range(player["height"]):
-        for col in range(player["width"]):
-            if (playersprite[row] >> (7-col)) & 1: #checks for a pixel to be drawn
-                display.pixel(player["x"] + col, player["y"] + row)
+    for row in range(player_values["height"]):
+        for col in range(player_values["width"]):
+            if playersprite[row][col]: #checks for a pixel to be drawn
+                display.pixel(player_values["x"] + col, player_values["y"] + row)
 
 
     
@@ -200,18 +211,24 @@ SPEED = 1
 
 # main loop
 while True:
-    if board.switch_pressed(SWITCH_A):   # left
-        player["x"] -= SPEED
+    if board.switch_pressed(SWITCH_A):
+        if xcoord > 0:
+            player_values["x"] = playerx[xcoord - 1]
+            xcoord -= 1
+            time.sleep(0.02)
     if board.switch_pressed(SWITCH_B):   # right
-        player["x"] += SPEED
+        if xcoord < 7:
+            player_values["x"] = playerx[xcoord + 1]
+            xcoord += 1
+            time.sleep(0.02)
     if board.switch_pressed(SWITCH_C):   # up
-        player["y"] -= SPEED
+        player_values["y"] -= SPEED
     if board.switch_pressed(SWITCH_D):   # down
-        player["y"] += SPEED
+        player_values["y"] += SPEED
 
     # keep on screen
-    player["x"] = max(0, min(player["x"], WIDTH - 8))
-    player["y"] = max(0, min(player["y"], HEIGHT - 8))
+    player_values["x"] = max(0, min(player_values["x"], WIDTH - 8))
+    player_values["y"] = max(0, min(player_values["y"], HEIGHT - 8))
 
 
     display.set_pen(0)
