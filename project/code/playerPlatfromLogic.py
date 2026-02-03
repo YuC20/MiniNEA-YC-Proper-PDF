@@ -259,17 +259,20 @@ while True:
         print(player_values["y"])
 
     # keep on screen
-    player_values["x"] = max(0, min(player_values["x"], WIDTH - 8))
-    player_values["y"] = max(0, min(player_values["y"], HEIGHT - 8))
+    #player_values["x"] = max(0, min(player_values["x"], WIDTH - 8))
+    #player_values["y"] = max(0, min(player_values["y"], HEIGHT - 8))
 
     # Moving platform logic
     if wait[currentWait] == 0 and plat_direction == 1:
         plat_values["y"] = platfromy[ycoordPlat + 1]
         ycoordPlat += 1
 
+        
+
     elif wait[currentWait] == 0 and plat_direction == -1:
         plat_values["y"] = platfromy[ycoordPlat - 1]
         ycoordPlat -= 1
+
 
     if ycoordPlat == 4:
         plat_direction = -1
@@ -284,6 +287,8 @@ while True:
     elif ycoordPlayer == 2:
         player_direction = 1
 
+
+
     #increment wait timer
     if currentWait < 5: 
         currentWait += 1
@@ -294,8 +299,8 @@ while True:
     display.set_pen(0)
     display.clear()      
 
-    DrawPlayer()
     DrawPlatform()
+    DrawPlayer()
     DrawStage()
     DrawStage2()
 
