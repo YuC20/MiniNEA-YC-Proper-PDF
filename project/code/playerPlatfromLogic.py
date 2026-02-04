@@ -15,7 +15,7 @@ ycoordPlayer = 2
 
 # platform data
 
-platfromy = [21, 31, 42, 54, 64]
+platfromy = [21, 31, 42, 54, 64, 74]
 platfromx = 66
 ycoordPlat = 0
 
@@ -236,7 +236,7 @@ currentWait = 0
 player_direction = 1  # 1 for down, -1 for up
 
 
-plat_direction = 1  # 1 for down, -1 for up
+plat_direction = 1  # 1 for up, -1 for down
 
 # main loop
 while True:
@@ -251,7 +251,7 @@ while True:
         ycoordPlat -= 1
 
     
-    if ycoordPlat == 4:
+    if ycoordPlat == len(platfromy) - 1:
         plat_direction = -1
 
     elif ycoordPlat == 0:
@@ -278,16 +278,28 @@ while True:
     player_on_plat_x = playerx[xcoordPlayer] == (plat_values["x"] + 2)
     player_on_plat_y = (playery[ycoordPlayer] >= plat_values["y"] + 2) and (playery[ycoordPlayer] <= plat_values["y"] + 3)
     
-    # Check if platform is moving down this frame
+    # Check if platform is moving up or down in the current cycle
     plat_moving_down = (wait[currentWait] == 0) and (plat_direction == 1)
+    plat_moving_up = (wait[currentWait] == 0) and (plat_direction == -1)
 
-    if player_on_plat_x and player_on_plat_y and plat_moving_down:
-        if ycoordPlayer > 0:
-            ycoordPlayer -= 1
-            player_values["y"] = playery[ycoordPlayer]
-            print(f"Player moved down to index {ycoordPlayer}")
-        else:
-            print("Player reached bottom of grid range")
+    if player_on_plat_x and player_on_plat_y:
+        
+        # Logic moving down
+        if plat_moving_down:
+
+            if ycoordPlayer > 0:
+                next_grid_y = playery[ycoordPlayer - 1]
+                if plat_values["y"] >= next_grid_y - 2:
+                    ycoordPlayer -= 1
+
+        elif plat_moving_up:
+            if ycoordPlayer < len(playery) - 1:
+                prev_grid_y = playery[ycoordPlayer + 1]
+                if plat_values["y"] <= prev_grid_y + 2:
+                    ycoordPlayer += 1
+
+
+
 
     # Moving player y logic   
     if ycoordPlayer == 0:
