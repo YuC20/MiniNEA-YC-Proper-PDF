@@ -258,7 +258,7 @@ while True:
         plat_direction = 1
 
 
-    # Moving player left right logic
+    # Moving player left right 
     if board.switch_pressed(SWITCH_A):
         if xcoordPlayer > 0:
             player_values["x"] = playerx[xcoordPlayer - 1]
@@ -270,17 +270,24 @@ while True:
             xcoordPlayer += 1
             time.sleep(0.02)
 
-
+    # Keeps player on platform 
     if abs(player_values["x"] - plat_values["x"]) < 5: 
         player_values["y"] = plat_values["y"] - 8 
 
+    # Check if player is on the platform
+    player_on_plat_x = playerx[xcoordPlayer] == (plat_values["x"] + 2)
+    player_on_plat_y = (playery[ycoordPlayer] >= plat_values["y"] + 2) and (playery[ycoordPlayer] <= plat_values["y"] + 3)
+    
+    # Check if platform is moving down this frame
+    plat_moving_down = (wait[currentWait] == 0) and (plat_direction == 1)
 
-    if playerx[xcoordPlayer] == (plat_values["x"] + 2) and (playery[ycoordPlayer] == plat_values["y"] + 2 or playery[ycoordPlayer] == plat_values["y"] + 3) and wait[currentWait] == 0 and plat_direction == 1:
-        # Move player down with platform
-        player_values["y"] = playery[ycoordPlayer - 1]
-        ycoordPlayer -= 1
-        print(ycoordPlayer)
-        print(player_values["y"])
+    if player_on_plat_x and player_on_plat_y and plat_moving_down:
+        if ycoordPlayer > 0:
+            ycoordPlayer -= 1
+            player_values["y"] = playery[ycoordPlayer]
+            print(f"Player moved down to index {ycoordPlayer}")
+        else:
+            print("Player reached bottom of grid range")
 
     # Moving player y logic   
     if ycoordPlayer == 0:
@@ -299,11 +306,6 @@ while True:
     # draw everything
     display.set_pen(0)
     display.clear()      
-
-    print("----------------------")
-    print(plat_values["y"])
-    print(player_values["y"])
-    print("----------------------")
 
     DrawPlatform()
     DrawPlayer()
