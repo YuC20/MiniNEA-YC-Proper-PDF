@@ -1,12 +1,12 @@
 31/01/2026
-Problem:
+#1 Problem:
   How to seperate player movement speed and platform movement speed
   
 Solution:
   Looped through list "wait = [0, 1, 2, 3, 4, 5]" each time everything was updated and only allowed platforms to move when "wait[current] == 0"  
 
 01/02/2026
-Problem:
+#1 Problem:
   Platform does not go up after reaching lowest point
 
 Solution:
@@ -14,7 +14,7 @@ Solution:
 
 
 03/02/2026
-Problem:
+#1 Problem:
   Platform moves before player does
 
 Solution:
@@ -22,8 +22,17 @@ Solution:
   1. Calculate Platform Position
   2. Calculate Player position
 
+
 04/02/2026
-Problem:
+#0.5 Problem:
+  Platform only moves the player down. Inefficient to copy and paste repeated code for the player to move back up with the platform. Code would also make it difficult to add new y coordinates for the player. 
+
+Solution:
+  Added logic which moves the player by keeping it within the confines the platform meaning its y coordinates are dependant on the platforms y coordinates
+  
+
+
+#1 Problem:
   Player randomly teleports into random positions when moving up and down with the platform.
   This happened due to me using 2 ways of making the player move with the platform. One was keeping the player with the platform sprite. 
 
