@@ -8,16 +8,18 @@ WIDTH, HEIGHT = display.get_bounds()
 
 # player data
 
-playerx = [14, 24, 34, 54, 68, 86, 96, 106]
+playerx = [14, 24, 34, 52, 68, 86, 96, 106]
 playery = [46, 34, 23]
 xcoordPlayer = 1
 ycoordPlayer = 2
 
 # platform data
 
-platfromy = [21, 31, 42, 54, 64, 74]
+platfromy = [11, 21, 31, 42, 54, 64]
 platfromx = 66
+platformxLeft = 50
 ycoordPlat = 0
+ycoordPlat_left = 4
 
 # object values
 player_values = {
@@ -29,7 +31,15 @@ player_values = {
 
 plat_values = {
     "x": platfromx,
-    "y": 21,
+    "y": 11,
+    "width": 14,
+    "height": 2,
+    "speed": 1,
+}
+
+plat_values_left = {
+    "x": platformxLeft,
+    "y": 64,
     "width": 14,
     "height": 2,
     "speed": 1,
@@ -212,6 +222,13 @@ def DrawPlatform():
             if plat_sprite[row][col]: #checks for a pixel to be drawn
                 display.pixel(plat_values["x"] + col, plat_values["y"] + row)
 
+def DrawPlatform2():
+    display.set_pen(15)
+    for row in range(plat_values_left["height"]):
+        for col in range(plat_values_left["width"]):
+            if plat_sprite[row][col]: #checks for a pixel to be drawn
+                display.pixel(plat_values_left["x"] + col, plat_values_left["y"] + row)
+
     
 def DrawStage():
     display.set_pen(15)
@@ -237,11 +254,12 @@ player_direction = 1  # 1 for down, -1 for up
 
 
 plat_direction = 1  # 1 for up, -1 for down
+plat_direction_left = 1  # 1 for up, -1 for down
 
 # main loop
 while True:
 
-    # Moving platform logic
+    # Moving Right_side platform logic ------------------------
     if wait[currentWait] == 0 and plat_direction == 1:
         plat_values["y"] = platfromy[ycoordPlat + 1]
         ycoordPlat += 1   
@@ -249,14 +267,29 @@ while True:
     elif wait[currentWait] == 0 and plat_direction == -1:
         plat_values["y"] = platfromy[ycoordPlat - 1]
         ycoordPlat -= 1
-
     
-    if ycoordPlat == len(platfromy) - 1:
+    if ycoordPlat == 5:
         plat_direction = -1
 
     elif ycoordPlat == 0:
         plat_direction = 1
 
+
+    # Moving Left_side Platform logic  ------------------------
+
+    if wait[currentWait] == 0 and plat_direction_left == 1:
+        plat_values_left["y"] = platfromy[ycoordPlat_left + 1]
+        ycoordPlat_left += 1
+
+    elif wait[currentWait] == 0 and plat_direction_left == -1:
+        plat_values_left["y"] = platfromy[ycoordPlat_left - 1]
+        ycoordPlat_left -= 1
+
+    if ycoordPlat_left == 5:
+        plat_direction_left = -1
+
+    elif ycoordPlat_left == 0:
+        plat_direction_left = 1
 
     # Moving player left right 
     if board.switch_pressed(SWITCH_A):
@@ -320,6 +353,7 @@ while True:
     display.clear()      
 
     DrawPlatform()
+    DrawPlatform2()
     DrawPlayer()
     DrawStage()
     DrawStage2()
