@@ -376,7 +376,18 @@ while True:
         currentWait += 1
     else:
         currentWait = 0
-        
+
+    
+    # player death
+    if (player_values["y"] > 54 and wait[currentWait] == 4) or (player_values["y"] < 9 and wait[currentWait] == 4):
+        print("Player death")
+        player_values["lives"] = player_values["lives"] - 1
+        player_values["x"] = 14
+        player_values["y"] = 23
+
+
+
+
     # draw everything
     display.set_pen(0)
     display.clear()      
