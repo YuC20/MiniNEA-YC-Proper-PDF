@@ -65,4 +65,8 @@ Solution: Solved in commit "28a386a08f474e947f1b01830d2a9bba56ff4e3f" and "1f67b
 Solution: Added logic to see if the platform is on same elvation as the player 
           if abs(player_values["x"] - plat_values["x"]) < 5 and abs((player_values["y"] - plat_values["y"]) < 12): 
 
+#2 Problem:
+  Player can move off platforms at all elevtions
+
+Solution: Added logic so that the player can only move off if at certain elevations
   
