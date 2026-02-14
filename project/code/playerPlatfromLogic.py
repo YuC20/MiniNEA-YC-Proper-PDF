@@ -62,6 +62,27 @@ stage_values2 = {
     "height": 64
 }
 
+lives_sprite_values_one = {
+    "x": 120,
+    "y": 2,
+    "width": 5,
+    "height": 4
+}
+
+lives_sprite_values_two = {
+    "x": 114,
+    "y": 2,
+    "width": 5,
+    "height": 4
+}
+
+lives_sprite_values_three = {
+    "x": 108,
+    "y": 2,
+    "width": 5,
+    "height": 4
+}
+
 # sprite data
 player_sprite = [
 [0, 1, 1, 1, 1, 1, 0, 0], 
@@ -211,6 +232,15 @@ stage_sprite2 = [
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]						
 
+lives_sprite_one = [
+[1, 1, 1, 1, 1], [1, 0, 1, 0, 1], [1, 1, 1, 1, 1], [0, 1, 1, 1, 0]]
+
+lives_sprite_two = [
+[1, 1, 1, 1, 1], [1, 0, 1, 0, 1], [1, 1, 1, 1, 1], [0, 1, 1, 1, 0]]
+
+lives_sprite_three = [
+[1, 1, 1, 1, 1], [1, 0, 1, 0, 1], [1, 1, 1, 1, 1], [0, 1, 1, 1, 0]]
+
 def DrawPlayer():
     display.set_pen(15)
     for row in range(player_values["height"]):
@@ -246,6 +276,28 @@ def DrawStage2():
         for col in range(stage_values2["width"]):
             if stage_sprite2[row][col]: #checks for a pixel to be drawn
                 display.pixel(stage_values2["x"] + col, stage_values2["y"] + row)
+
+def DrawLivesOne():
+    display.set_pen(15)
+    for row in range(lives_sprite_values_one["height"]):
+        for col in range(lives_sprite_values_one["width"]):
+            if lives_sprite_one[row][col]: #checks for a pixel to be drawn
+                display.pixel(lives_sprite_values_one["x"] + col, lives_sprite_values_one["y"] + row)
+
+def DrawLivesTwo():
+    display.set_pen(15)
+    for row in range(lives_sprite_values_two["height"]):
+        for col in range(lives_sprite_values_two["width"]):
+            if lives_sprite_two[row][col]: #checks for a pixel to be drawn
+                display.pixel(lives_sprite_values_two["x"] + col, lives_sprite_values_two["y"] + row)
+
+def DrawLivesThree():
+    display.set_pen(15)
+    for row in range(lives_sprite_values_three["height"]):
+        for col in range(lives_sprite_values_three["width"]):
+            if lives_sprite_three[row][col]: #checks for a pixel to be drawn
+                display.pixel(lives_sprite_values_three["x"] + col, lives_sprite_values_three["y"] + row)
+
 
 SPEED = 1
 
@@ -384,7 +436,10 @@ while True:
         player_values["lives"] = player_values["lives"] - 1
         player_values["x"] = 14
         player_values["y"] = 23
+        print(player_values["lives"])
 
+    if wait[currentWait] == 5 and player_values["lives"] == 0:
+        sys.exit("Game Over")
 
 
 
@@ -397,6 +452,13 @@ while True:
     DrawPlayer()
     DrawStage()
     DrawStage2()
+    if player_values["lives"] >= 1:
+        DrawLivesOne()
+    if player_values["lives"] >= 2:
+        DrawLivesTwo()
+    if player_values["lives"] >= 3:
+        DrawLivesThree()
+
 
     display.update()      
     time.sleep(0.2)
