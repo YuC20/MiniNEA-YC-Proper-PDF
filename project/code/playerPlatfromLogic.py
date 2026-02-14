@@ -330,8 +330,7 @@ while True:
         plat_direction = 1
 
 
-    # Moving Left_side Platform logic  ------------------------
-
+    # Moving Left_side Platform logic
     if wait[currentWait] == 0 and plat_direction_left == 1:
         plat_values_left["y"] = platfromy[ycoordPlat_left + 1]
         ycoordPlat_left += 1
@@ -346,13 +345,32 @@ while True:
     elif ycoordPlat_left == 0:
         plat_direction_left = 1
 
-    # Moving player left right 
-    if board.switch_pressed(SWITCH_A):
+    # Movement Restrictions Logic
+    on_right_plat = abs(player_values["x"] - plat_values["x"]) < 5 and abs(player_values["y"] - (plat_values["y"] - 8)) < 4
+    on_left_plat = abs(player_values["x"] - plat_values_left["x"]) < 5 and abs(player_values["y"] - (plat_values_left["y"] - 8)) < 4
+    
+    can_move_horizontally = True
+    restricted_elevations = [9, 21, 54, 64]
+
+    if on_right_plat:
+        if plat_values["y"] in restricted_elevations:
+            can_move_horizontally = False
+
+    elif on_left_plat:
+        if plat_values_left["y"] in restricted_elevations:
+            if plat_values_left["y"] == 54:
+                can_move_horizontally = True
+            else:
+                can_move_horizontally = False
+
+    # left right mvoement logic
+    if board.switch_pressed(SWITCH_A) and can_move_horizontally:
         if xcoordPlayer > 0:
             player_values["x"] = playerx[xcoordPlayer - 1]
             xcoordPlayer -= 1
             time.sleep(0.02)
-    if board.switch_pressed(SWITCH_B):   # right
+
+    if board.switch_pressed(SWITCH_B) and can_move_horizontally:
         if xcoordPlayer < 7:
             player_values["x"] = playerx[xcoordPlayer + 1]
             xcoordPlayer += 1
