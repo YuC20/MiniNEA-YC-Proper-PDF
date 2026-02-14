@@ -57,5 +57,12 @@ Solution: Solved in commmit  "7290381829c361668bfdfe4a09d82b6a87da60cc"
 Solution: Solved in commit "28a386a08f474e947f1b01830d2a9bba56ff4e3f" and "1f67bf0344e7e9179419d89abff48aa6d77d5ce1"
   Created seperate logic and variables for both platforms. *Note*This could be made more efficient at a later date
 
+13/02/2026
+
+#1 Problem:
+  Player is teleporting up to platform above it
+
+Solution: Added logic to see if the platform is on same elvation as the player 
+          if abs(player_values["x"] - plat_values["x"]) < 5 and abs((player_values["y"] - plat_values["y"]) < 12): 
 
   
