@@ -13,6 +13,39 @@ playery = [46, 34, 23]
 xcoordPlayer = 1
 ycoordPlayer = 2
 
+class Player:
+    def __init__(self, x_list, y_list, x_index, y_index, lives, sprite):
+        self.x_list = x_list
+        self.y_list = y_list
+        self.x_index = x_index
+        self.y_index = y_index
+        self.lives = lives
+        self.sprite = sprite
+
+    def get_pos(self):
+        # Returns the coordinates of the player
+        return self.x_list[self.x_index], self.y_list[self.y_index]
+
+    def move(self, x):
+        # increment X index and prevents going off-screen
+        new_x = self.x_index + x
+        if 0 <= new_x < 7:
+            self.x_index = new_x
+
+
+    def reset_position(self):
+        # Used when player dies
+        self.x_index = 1
+        self.y_index = 2
+
+    def draw(self, display):
+        x, y = self.get_pos()
+        display.set_pen(15)
+        for row in range(len(self.sprite)):
+            for col in range(len(self.sprite[row])):
+                if self.sprite[row][col]:
+                    display.pixel(x + col, y + row)
+
 # platform data
 platfromy = [9, 21, 31, 42, 54, 64]
 platfromx = 66
@@ -28,13 +61,6 @@ score = 0
 
 
 # object values
-player_values = {
-    "x": 14,
-    "y": 23,
-    "width": 8,
-    "height": 8,
-    "lives" : 3
-}
 
 plat_values = {
     "x": platfromx,
@@ -340,13 +366,6 @@ sand_in_top_right = []
 sand_in_bot_left = []
 sand_in_bot_right = []
 
-def DrawPlayer():
-    display.set_pen(15)
-    for row in range(player_values["height"]):
-        for col in range(player_values["width"]):
-            if player_sprite[row][col]: #checks for a pixel to be drawn
-                display.pixel(player_values["x"] + col, player_values["y"] + row)
-
 def DrawPlatform():
     display.set_pen(15)
     for row in range(plat_values["height"]):
@@ -548,25 +567,25 @@ def update_sand():
     release_hopper(sand_in_bot_left, hopper_left2_open)
     release_hopper(sand_in_bot_right, hopper_right2_open)
 
-def release_hopper(hopper_list, is_open):
-    if is_open and len(hopper_list) > 0:
-        sand = hopper_list.pop(0) # Take the bottom-most sand
+def release_hopper(hopper_list, is_open): # Subroutine to release sand from the hopper
+    if is_open and len(hopper_list) > 0: # If the hopper is open and there is sand in the hopper
+        sand = hopper_list.pop(0) # Take the bottom-most sand in the hopper
         sand["y"] += 2            
-        active_sand.append(sand)
+        active_sand.append(sand) # Adds it  to the active sand list so it can fall from the hopper 
 
 def DrawStackedSand():
     display.set_pen(15)
-    # each hopper's base coords
-    hopper_coords = [
+    # each hopper's base coords stored as tuples
+    hopper_coords = [ 
         (sand_in_top_left, 3, 30), 
         (sand_in_top_right, 116, 30),
         (sand_in_bot_left, 3, 40),
         (sand_in_bot_right, 116, 40)
     ]
     
-    for sand_list, x, base_y in hopper_coords:
-        for i, sand in enumerate(sand_list):            
-            draw_single_sand(x, base_y - (i * 2)) # i*2 to stacks sand 
+    for sand_list, x, base_y in hopper_coords: # loops through hoppers sand list and its base coordinates
+        for i, sand in enumerate(sand_list):  # Runs throug each sand in the hopper list and its index          
+            draw_single_sand(x, base_y - (i * 2)) # draws the sand at the y coordinate 2 above the sand below it
 
 def draw_single_sand(x, y):
     for row in range(2):
@@ -590,39 +609,46 @@ player_direction = 1  # 1 for down, -1 for up
 plat_direction = 1  # 1 for up, -1 for down
 plat_direction_left = 1  # 1 for up, -1 for down
 
-game_running = True
+game_running = True #this is set to False if the player runs out of lives
+
+#initialise player 
+mario = Player(playerx, playery, 1, 2, 3, player_sprite)
 
 # main loop
 while True:
-    if game_running:
-        # Check if player is on platforms
-        on_right_plat = (abs(player_values["x"] - plat_values["x"]) < 12) and (abs((plat_values["y"] - 8) - player_values["y"]) < 5) #Check to see if the player is close to the platform in the x direction and y direction
+    if game_running: # Checks in the game is still running
 
-        on_left_plat = (abs(player_values["x"] - plat_values_left["x"]) < 12) and (abs((plat_values_left["y"] - 8) - player_values["y"]) < 5)
+        # Get player values
+        playerx, playery = mario.get_pos()
+
+        # Check if player is on platforms
+        on_right_plat = (abs(playerx - plat_values["x"]) < 12) and (abs((plat_values["y"] - 8) - playery) < 5) #Check to see if the player is close to the platform in the x direction and y direction
+
+        on_left_plat = (abs(playerx - plat_values_left["x"]) < 12) and (abs((plat_values_left["y"] - 8) - playery) < 5)
 
         old_plat_y = plat_values["y"]
         old_plat_left_y = plat_values_left["y"]
 
         # Check if player is at the Left Hopper trigger
-        if abs(player_values["x"] - hopper_sprite_left1_values["x"]) < 15 and abs(player_values["y"] - hopper_sprite_left1_values["y"]) < 8:
-            hopper_left_open = True
+        if abs(playerx - hopper_sprite_left1_values["x"]) < 15 and abs(playery - hopper_sprite_left1_values["y"]) < 8: # Checks if the player close to the hopper in the x and y direction
+            hopper_left_open = True # Sets the hoppers state to open if the player is close enough to the hopper
         else:
-            hopper_left_open = False
+            hopper_left_open = False # Otherwise the hoppers state is closed
 
         # Check if player is at the Right Hopper trigger
-        if abs(player_values["x"] - hopper_sprite_right1_values["x"]) < 15 and abs(player_values["y"] - hopper_sprite_right1_values["y"]) < 8:
+        if abs(playerx - hopper_sprite_right1_values["x"]) < 15 and abs(playery - hopper_sprite_right1_values["y"]) < 8:
             hopper_right_open = True
         else:
             hopper_right_open = False
 
         # Check if player is at the Left Hopper 2 trigger
-        if abs(player_values["x"] - hopper_sprite_left2_values["x"]) < 15 and abs(player_values["y"] - hopper_sprite_left2_values["y"]) < 8:
+        if abs(playerx - hopper_sprite_left2_values["x"]) < 15 and abs(playery - hopper_sprite_left2_values["y"]) < 8:
             hopper_left2_open = True
         else:
             hopper_left2_open = False
 
         # Check if player is at the Right Hopper 2 trigger
-        if abs(player_values["x"] - hopper_sprite_right2_values["x"]) < 15 and abs(player_values["y"] - hopper_sprite_right2_values["y"]) < 8:
+        if abs(playerx - hopper_sprite_right2_values["x"]) < 15 and abs(playery - hopper_sprite_right2_values["y"]) < 8:
             hopper_right2_open = True
         else:
             hopper_right2_open = False
@@ -639,7 +665,7 @@ while True:
 
             # If player was on the platform move them by the same distance it just moved
             if on_right_plat:
-                player_values["y"] += (plat_values["y"] - old_plat_y)
+                playery += (plat_values["y"] - old_plat_y)
 
         if ycoordPlat == 5:
             plat_direction = -1 # Changes direction of platform movement when it gets to the top
@@ -658,7 +684,7 @@ while True:
 
             # If player was on the platform move them by the same distance it just moved
             if on_left_plat:
-                player_values["y"] += (plat_values_left["y"] - old_plat_left_y)
+                playery += (plat_values_left["y"] - old_plat_left_y)
 
         if ycoordPlat_left == 5:
             plat_direction_left = -1
@@ -667,41 +693,22 @@ while True:
         
         
         # Keeps the player locked to the platfomr
-        #if on_right_plat:
-            #player_values["y"] = plat_values["y"] - 8
-        #elif on_left_plat:
-            #player_values["y"] = plat_values_left["y"] - 8
-
-
-        # Movement restrictions
-        can_move_horizontally = True
-        restricted_elevations = [9, 21, 64] 
-
         if on_right_plat:
-            if plat_values["y"] in restricted_elevations:
-                can_move_horizontally = False
+            playery = plat_values["y"] - 8
         elif on_left_plat:
-            if plat_values_left["y"] in restricted_elevations:
-                can_move_horizontally = False
+            playery = plat_values_left["y"] - 8
 
 
         # Horizontal movement logic
-        if board.switch_pressed(SWITCH_A) and can_move_horizontally:
-            if xcoordPlayer > 0:
-                xcoordPlayer -= 1
-                player_values["x"] = playerx[xcoordPlayer]
-                time.sleep(0.1) 
-
-        if board.switch_pressed(SWITCH_B) and can_move_horizontally:
-            if xcoordPlayer < 7:
-                xcoordPlayer += 1
-                player_values["x"] = playerx[xcoordPlayer]
-                time.sleep(0.1)
+    if board.switch_pressed(SWITCH_A):
+        mario.move(-1)
+    if board.switch_pressed(SWITCH_B):
+        mario.move(1)
 
         # Gravity and ground Check
         if not on_right_plat and not on_left_plat:
             if not is_on_ground():
-                player_values["y"] += 5
+                playery += 5 # Increases the players y coordinate so it falls
 
 
         #increment wait timer
@@ -712,16 +719,15 @@ while True:
 
 
         # player death
-        if player_values["y"] > 60 or player_values["y"] < 0: #Checks if player is in deathzone
+        if playery > 60 or playery < 0: #Checks if player is in deathzone
             print("Player death")
-            player_values["lives"] -= 1
-            player_values["x"] = 14 #reset player to starting coords
-            player_values["y"] = 23
+            mario.lives -= 1
+            mario.reset_position()
             time.sleep(0.5) 
 
         update_sand()
 
-        if player_values["lives"] <= 0:
+        if mario.lives <= 0:
             game_running = False
 
 
@@ -731,7 +737,7 @@ while True:
 
         DrawPlatform()
         DrawPlatform2()
-        DrawPlayer()
+        mario.draw(display)
         DrawStage()
         DrawStage2()
         DrawHopperLeft()
@@ -746,11 +752,11 @@ while True:
         DrawScore()  
         DrawStackedSand()  
 
-        if player_values["lives"] >= 1:
+        if mario.lives >= 1:
             DrawLivesOne()
-        if player_values["lives"] >= 2:
+        if mario.lives >= 2:
             DrawLivesTwo()
-        if player_values["lives"] >= 3:
+        if mario.lives >= 3:
             DrawLivesThree()
     
     else: # Game Over Screen
@@ -761,9 +767,10 @@ while True:
         display.text(f"SCORE: {score}", 45, 40, 128, 1)
         display.text("Press A to Restart", 17, 55, 128, 1)
 
-        if board.switch_pressed(SWITCH_A):
-            player_values["lives"] = 3
-            score = 0
+        #game reset
+        if board.switch_pressed(SWITCH_A): # restarts game when A is pressed
+            mario.lives = 3 # resets lives
+            score = 0 # resets score
             active_sand = [] # Clear old sand
             game_running = True
             time.sleep(0.5)
