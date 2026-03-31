@@ -705,11 +705,27 @@ while True:
         elif on_left_plat:
             mario.y = plat_values_left["y"] - 8
 
+        can_move_left = True
+        can_move_right = True
+
+        if playery > 45 and playerx < 64:
+            can_move_left = True
+            if playery > 50 and playerx < 64:
+                can_move_left = False
+            elif playery > 40 and playerx <= 50:
+                can_move_left = False
+        
+        elif playery > 45 and playerx > 64:
+            can_move_right = False
+
+        else:
+            can_move_right = True
+            can_move_left = True
 
         # Horizontal movement logic
-        if board.switch_pressed(SWITCH_A):
+        if board.switch_pressed(SWITCH_A) and can_move_left is True : # Checks if A is pressed and the player is allowed to move
             mario.move(-1) # calls the move method in the player class to move the player left when A is pressed
-        if board.switch_pressed(SWITCH_B):
+        if board.switch_pressed(SWITCH_B) and can_move_right is True: # Checks if B is pressed and the player is allowed to move
             mario.move(1) # calls the move method in the player class to move the player right when B is pressed
 
         # Gravity and ground Check
@@ -779,6 +795,11 @@ while True:
             mario.lives = 3 # resets lives
             score = 0 # resets score
             active_sand = [] # Clear old sand
+            sand_in_top_left = [] # Clear sand in hoppers
+            sand_in_top_right = []
+            sand_in_bot_left = []
+            sand_in_bot_right = []
+            display.clear() # Clear the display
             game_running = True
             time.sleep(0.5)
 
