@@ -1,0 +1,170 @@
+name: Markdown to PDF
+on:
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xfonts-75dpi xfonts-base pandoc jq
+          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+          sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+          sudo apt-get install -f
+          wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb
+          sudo dpkg -i wkhtmltox_0.12.5-1.bionic_amd64.deb
+          sudo apt-get -f install
+
+      - name: Download GitHub Markdown CSS
+        run: |
+          wget -O github-markdown.css https://raw.githubusercontent.com/sindresorhus/github-markdown-css/refs/heads/main/github-markdown.css
+
+      - name: Convert Markdown to PDF with GitHub styling
+        run: |
+          mkdir -p pdf_output
+          for mdfile in *.md; do
+            [[ "$mdfile" == "README.md" ]] && continue
+            [[ -s "$mdfile" ]] || continue
+            
+            base_name="$(basename "$mdfile" .md)"
+            htmlname="${base_name}.html"
+            pdfname="pdf_output/${base_name}.pdf"
+            
+            # Create temporary CSS and HTML snippet files
+            echo '<link rel="stylesheet" href="github-markdown.css">' > header_link.html
+            
+            echo '<style>
+                /* FULL-WIDTH OVERRIDES */
+                body {
+                  width: 100% !important;
+                  max-width: none !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                }
+                .markdown-body {
+                  box-sizing: border-box;
+                  width: 100% !important;
+                  max-width: none !important;
+                  margin: 0 !important;
+                  padding: 15mm !important;
+                }
+                @page {
+                  size: A4;
+                  margin: 10mm;
+                }
+                @media print {
+                  .markdown-body {
+                    padding: 0 !important;
+                  }
+                }
+            
+                /* CODE BLOCK STYLING */
+                .markdown-body pre,
+                .markdown-body code,
+                .hljs {
+                  white-space: pre-wrap !important;
+                  word-wrap: break-word !important;
+                  overflow-wrap: anywhere !important;
+                  overflow: hidden !important;
+                  page-break-inside: avoid;
+                  -ms-overflow-style: none !important;
+                  scrollbar-width: none !important;
+                }
+                .markdown-body pre::-webkit-scrollbar {
+                  display: none !important;
+                  width: 0 !important;
+                  height: 0 !important;
+                }
+            
+                /* TABLES - FULL WIDTH & PAGE BREAK CONTROL */
+                .markdown-body table {
+                  width: 100% !important;
+                  max-width: 100% !important;
+                  border-collapse: collapse;
+                  page-break-inside: auto !important;
+                  margin-bottom: 16px !important;
+                }
+                .markdown-body tr {
+                  page-break-inside: avoid !important;
+                  page-break-after: auto !important;
+                  background-color: #fff;
+                  border-top: 1px solid #c6cbd1;
+                }
+                .markdown-body tr:nth-child(2n) {
+                  background-color: #f6f8fa;
+                }
+                .markdown-body th,
+                .markdown-body td {
+                  border: 1px solid #dfe2e5;
+                  padding: 6px 13px;
+                  word-break: break-word !important;
+                  page-break-inside: avoid !important;
+                }
+                .markdown-body thead {
+                  display: table-header-group !important;
+                }
+                .markdown-body thead tr {
+                  background-color: #f6f8fa !important;
+                }
+                /* Optional: For cells that MUST break */
+                .markdown-body td.force-break {
+                  page-break-inside: auto !important;
+                }
+            
+                /* IMAGES */
+                .markdown-body img {
+                  max-width: 100%;
+                  height: auto;
+                }
+                .markdown-body a {
+                  color: #0366d6;
+                  text-decoration: underline;
+                }
+            </style>' > header_style.html
+              
+            echo '<div class="markdown-body">' > body_open.html
+            echo '</div>' > body_close.html
+            
+            # Convert Markdown to HTML and save it
+            pandoc "$mdfile" -f markdown -t html -s -o "$htmlname" \
+              --include-in-header=header_link.html \
+              --include-in-header=header_style.html \
+              --resource-path=".:./Images:./Images/Survey Qs" \
+              --wrap=preserve \
+              --embed-resources \
+              --standalone \
+              -B body_open.html \
+              -A body_close.html
+              
+            # Convert HTML to PDF
+            wkhtmltopdf --enable-local-file-access \
+              --enable-external-links \
+              --enable-internal-links \
+              --margin-top 10mm --margin-bottom 15mm --margin-left 10mm --margin-right 10mm \
+              --page-size A4 \
+              --zoom 1.0 \
+              --footer-center "[page]/[topage]" \
+              --footer-font-size 10 \
+              "$htmlname" "$pdfname" || echo "PDF conversion failed for $mdfile"
+            
+            # Clean up temporary files (but keep the HTML file)
+            rm header_link.html header_style.html body_open.html body_close.html
+          done
+          
+      - name: Commit and push generated files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add pdf_output/
+          git commit -m "Update generated PDFs" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
